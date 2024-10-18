@@ -41,6 +41,24 @@
         </div>
     </div>
 </div>
+
+<!-- Modal pour afficher les erreurs de chargement -->
+<div id="errorModal" class="modal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="errorMessage">La configuration sélectionnée n'a pas encore de PTA associés</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -110,6 +128,10 @@ function getDeviceConfig() {
         })
         .catch((error) => {
             console.error('Error:', error);
+
+            // Afficher le modal d'erreur
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
         });
     }
 }

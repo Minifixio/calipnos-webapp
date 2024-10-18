@@ -17,8 +17,8 @@ def download_device_configuration(request):
     doctor_config = body['doctor_config']
 
     device_config = db_manager.get_device_configuration_from_doctor_configuration(doctor_config_ids)
-    print("Device config:")
-    print(device_config)
+    if device_config is None:
+        return JsonResponse({'error': 'No device configuration found'}, status=400)
 
     result = {
         "CC": doctor_config,
