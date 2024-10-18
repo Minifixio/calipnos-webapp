@@ -32,20 +32,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm delete-btn" data-id="1" title="Supprimer">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                        <button class="btn btn-success btn-sm download-btn" data-id="1" title="Télécharger">
-                            <i class="bi bi-download"></i>
-                        </button>
-                    </td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -198,19 +184,29 @@
             // Gérer la confirmation de suppression
             // TODO: Pas forcément obigé ici
             document.getElementById('confirm-delete-button').addEventListener('click', function () {
+                const confirmDeleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
                 const measureId = this.getAttribute('data-id');
                 
-                fetch(`/delete-measure/${measureId}/`, {
+                fetch(`delete-measure/${measureId}/`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}'  // Assurez-vous d'inclure le token CSRF
                     }
                 })
                 .then(response => {
+                    
                     if (response.ok) {
+                        const deleteButton = document.querySelector(`.delete-btn[data-id="${measureId}"]`);
+
                         // Supprimer la ligne du tableau
-                        const rowToRemove = document.querySelector(`.delete-btn[data-id="${measureId}"]`).closest('tr');
-                        rowToRemove.remove();
+                        if (deleteButton) { // Vérifier si le bouton existe
+                            const rowToRemove = deleteButton.closest('tr'); // Récupérer la ligne parente
+                            if (rowToRemove) {
+                                rowToRemove.remove(); // Supprimer la ligne
+                            }
+                        }
+
+                        confirmDeleteModal.hide();
                     } else {
                         // Gérer l'erreur ici
                         console.error('Erreur lors de la suppression de la mesure');

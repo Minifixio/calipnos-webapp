@@ -79,7 +79,6 @@ def get_measures(request):
     return JsonResponse(res, safe=False)
 
 @csrf_exempt
-@require_POST
 def delete_measure(request, measure_id):
     """
     Supprime une mesure basée sur son ID.
