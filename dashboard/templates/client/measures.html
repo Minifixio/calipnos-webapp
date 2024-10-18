@@ -1,0 +1,278 @@
+{% extends './base.html' %}
+{% block title %}Mesures{% endblock %}
+
+{% block extra_styles %}
+<style>
+    #input-button {
+    c   ursor: pointer !important;;
+    }
+    .file-input {
+        position: absolute;
+        top: 0; left: 0;
+        width: 10px;
+        height: 10px;
+        opacity: 0;
+        cursor:pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="w-100 p-3 m-10">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Date de dépôt</th>
+                        <th scope="col">Durée (sec)</th>
+                        <th scope="col">Nombre de points</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="1" title="Supprimer">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-success btn-sm download-btn" data-id="1" title="Télécharger">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center">
+            <form method="POST" id="bin-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <button for="bin-file" class="btn btn-primary mb-1" id="input-button">
+                    Déposer une nouvelle mesure &nbsp;<i class="bi-upload"></i>
+                    <input class="file-input" id="bin-file" type="file" name="binary" id="document" accept=".bin">
+                </button>
+            </form>  
+        </div>
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Erreur avec le fichier</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="error-message"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmation de suppression</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Êtes-vous sûr de vouloir supprimer cette mesure ?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete-button">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM chargé');
+        const fileInput = document.getElementById('bin-file');
+        const form = document.getElementById('bin-form');
+
+        // Empêcher la soumission du formulaire au clic sur le bouton
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Empêche le formulaire d'être soumis automatiquement
+        });
+
+        document.getElementById('input-button').addEventListener('click', function () {
+            document.getElementById('bin-file').click();  // Simule un clic sur le champ de fichier
+        });
+
+        fileInput.addEventListener('change', function (event) {
+            console.log('Fichier sélectionné :', fileInput.files[0]);
+            // Si aucun fichier n'a été sélectionné, on ne fait rien
+            if (fileInput.files.length === 0) {
+                return;
+            }
+
+            const formData = new FormData(); // Crée un objet FormData pour le fichier
+            formData.append('bin', fileInput.files[0]);
+
+            // Envoyer le fichier via fetch
+            fetch("{% url 'upload_binary' %}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json(); // Attendre que la réponse soit convertie en JSON
+                } else {
+                    // Gérer l'erreur ici, par exemple afficher un message dans une modal
+                    response.text().then((res) => {
+                        var errorMessageElement = document.querySelector("#error-message");
+                        errorMessageElement.innerHTML = res;
+                                          
+                        const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+                        modal.show();
+                    });
+                }
+            })
+            .then(data => {
+                // Vérifier que les données existent avant de continuer
+                if (data) {
+                    console.log("Upload du fichier binaire terminé... Données reçues :", data);
+
+                    // Vider le tableau existant
+                    const tbody = document.querySelector('table.table tbody');
+                    tbody.innerHTML = '';
+
+                    // Boucler sur les données reçues pour les afficher dans le tableau
+                    data.forEach(measure => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <th scope="row">${measure.id}</th>
+                            <td>${measure.upload_date}</td>
+                            <td>${measure.duration}</td>
+                            <td>${measure.points_count}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="${measure.id}" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm download-btn" data-id="${measure.id}" title="Télécharger">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    bindButtons(); // Lier les boutons après avoir chargé les mesures
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour de la liste de mesures :', error);
+            });
+        });
+
+        function bindButtons() {
+            // Événement pour le bouton de suppression
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const measureId = this.getAttribute('data-id');
+                    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+
+                    document.getElementById('confirm-delete-button').setAttribute('data-id', measureId);
+                    confirmDeleteModal.show();
+                });
+            });
+
+            // Gérer la confirmation de suppression
+            // TODO: Pas forcément obigé ici
+            document.getElementById('confirm-delete-button').addEventListener('click', function () {
+                const measureId = this.getAttribute('data-id');
+                
+                fetch(`/delete-measure/${measureId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'  // Assurez-vous d'inclure le token CSRF
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Supprimer la ligne du tableau
+                        const rowToRemove = document.querySelector(`.delete-btn[data-id="${measureId}"]`).closest('tr');
+                        rowToRemove.remove();
+                    } else {
+                        // Gérer l'erreur ici
+                        console.error('Erreur lors de la suppression de la mesure');
+                    }
+                })
+                .catch(error => console.error('Erreur de réseau:', error));
+            });
+
+            // Événement pour le bouton de téléchargement
+            document.querySelectorAll('.download-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const measureId = this.getAttribute('data-id');
+                    window.location.href = `download-measure/${measureId}/`; // Modifier l'URL pour la requête de téléchargement
+                });
+            });
+        }
+
+        function loadMeasures() {
+            fetch("{% url 'get_measures' %}") 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors du chargement des mesures');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Chargement des mesures... Données reçues :', data);
+
+                    // Vider le tableau existant
+                    const tbody = document.querySelector('table.table tbody');
+                    tbody.innerHTML = '';
+
+                    // Boucler sur les données reçues pour les afficher dans le tableau
+                    data.forEach(measure => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <th scope="row">${measure.id}</th>
+                            <td>${measure.upload_date}</td>
+                            <td>${measure.duration}</td>
+                            <td>${measure.points_count}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="${measure.id}" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-success btn-sm download-btn" data-id="${measure.id}" title="Télécharger">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    bindButtons(); // Lier les boutons après avoir chargé les mesures
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la mise à jour de la liste de mesures :', error);
+            });
+        }
+
+        loadMeasures(); // Charger les mesures au chargement de la page
+    });
+</script>
+{% endblock %}
+</body>
+</html>

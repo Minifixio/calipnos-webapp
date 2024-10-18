@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    
+    {% load static %}
+    <link rel="icon" href="{% static 'logo.svg' %}">
+
+    <script src="https://cdn.plot.ly/plotly-1.8.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <title>Calipnos</title>
+
+    <style>
+      .results {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .graph-container {
+        height: 100%;
+      }
+      .container {
+        margin: 0!important;
+      }
+      .file-input-container {
+        position: relative;
+      } 
+      #input-button {
+        cursor: pointer !important;;
+      }
+      .file-input {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor:pointer;
+      }
+      .file-return {
+        font-size: small;
+        padding: 5px;
+        width: 100%;
+      }
+      .file-return:not(:empty):before {
+        content: "Fichier sélectionné: ";
+        font-style: normal;
+        font-weight: normal;
+      }
+
+      .form-range-blue::-webkit-slider-thumb {
+        background: #0d6efd;
+      }
+      .form-range-orange::-webkit-slider-thumb {
+        background: #fd6b0d;
+      }
+      .form-range-orange::-moz-range-thumb {
+        background: #fd6b0d;
+      }
+      .form-range-orange::-ms-thumb {
+        background: #fd6b0d;
+      }
+      .form-range-blue::-moz-range-thumb {
+        background: #0d6efd;
+      }
+      .form-range-blue::-ms-thumb {
+        background: #0d6efd;
+      }
+    </style>
+</head>
+<body>
+
+<div class="results">
+    <div class="row w-100">
+      <div class="col-md-2 pa-5 d-flex flex-column align-items-center justify-content-center vh-100">
+        {% load static %}
+
+        <div class="d-flex align-items-center justify-content-center mt-1">
+          <img class="img-fluid" src="{% static 'logo.png' %}">
+        </div>
+
+        <div class="d-flex flex-column  w-100 vh-80 overflow-scroll pb-2" style="height: 90vh!important;">
+          <div class="card w-100" style="margin-top: 10px;">
+            <div class="card-body" style="padding: 5px!important;">
+              <form method="POST" id="params-form" class="d-flex flex-column">
+                <div class="d-flex flex-column align-items-start pa-4">
+                  {% csrf_token %}
+                  {% for choice in form.checkbox_choices %}
+                      <div class="form-check">
+                          <input class="form-check-input vh-90" type="checkbox" name="{{ choice.data.name }}" value="{{ choice.data.value }}" id="checkbox_{{ forloop.counter }}" checked="true" >
+                          <label class="form-check-label" for="checkbox_{{ forloop.counter }}">
+                              {{ choice.choice_label }}
+                          </label>
+                      </div>
+                  {% endfor %}
+                </div>
+  
+                <hr class="hr mb-2 mt-2"/>
+  
+  
+                <div id="range-sliders">
+                  {% for label, param in params.items %}
+                  <label for="{{ label }}_range" class="mb-0 small">{{ param.name }}</label>
+                  <span class="d-flex justify-content-between align-items-center mt-n5">
+                      <input type="range" style="height: 80%!important; -moz-range-thumb: gray;" class="form-range form-range-{{ param.color }} linked-range mt-0" id="{{ label }}_range" data-linked-display="{{ label }}_rangeValue" value="{{ param.value }}" data-param-name="{{ label }}" min="{{ param.min }}" max="{{ param.max }}">
+                      <span class="ml-2 small" id="{{label }}_rangeValue">{{ param.value }}</span>
+                  </span>
+                  {% endfor %}
+                </div>
+  
+                <input type="hidden" name="checked_values" id="checked-values" value="">
+                <button type="submit" class="btn btn-primary btn-sm mt-2">Valider</button>
+              </form>
+            </div>
+          </div>
+  
+  
+          <div class="card mt-2 w-100">
+            <div class="card-body" style="padding: 5px!important;">
+              <form method="POST" id="csv-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="d-flex flex-row align-items-center justify-content-between flex-wrap">
+                  <div class="file-input-container mx-1 w-100">  
+                    <button for="csv-file" class="btn btn-primary mb-1 w-100" id="input-button">
+                      Déposer  <i class="bi-upload"></i>
+                      <input class="file-input" id="csv-file" type="file" name="csv" id="document" accept=".csv">
+                    </button>
+                  </div>
+  
+                                
+                <button type="submit" class="btn btn-outline-primary mb-1 mx-1 w-100" id="process-button" disabled>
+                  Traiter <i class="bi bi-clipboard-data"></i>
+                </button>
+                </div>
+  
+                <div class="card">
+                  <div class="card-body file-return" id="file-return" style="padding: 5px!important;">
+                    -
+                  </div>
+                </div>
+              </form>  
+            </div>
+          </div>  
+        </div>
+      </div>
+
+      <div class="col-md-10">
+        <div id="graph-container" class="graph-container">
+          <div id="loading-spinner" class="align-items-center justify-content-center h-100" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+            </div>
+            <span class="sr-only ml-2">&nbsp; &nbsp;Loading...</span>
+          </div>
+          {% if graph %}
+            {{ graph|safe }}
+          {% else %}
+              <p>No graph was provided.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Erreur avec le fichier</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="error-message"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script
+  src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+  integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
+  crossorigin="anonymous"
+></script>
+
+<script type="text/javascript">
+
+  // Sélectionnez tous les sliders
+  const linkedRangeSliders = document.querySelectorAll('.linked-range');
+
+  // Ajoutez un gestionnaire d'événement pour chacun d'eux
+  linkedRangeSliders.forEach(function (rangeInput) {
+      // Récupérez l'ID de l'élément d'affichage lié à partir de l'attribut de données
+      const linkedDisplayId = rangeInput.dataset.linkedDisplay;
+      const rangeValueDisplay = document.getElementById(linkedDisplayId);
+
+      // Ajout d'un gestionnaire d'événement pour surveiller les changements de la plage
+      rangeInput.addEventListener('input', function() {
+          // Mise à jour le texte de l'élément d'affichage avec la valeur de la plage
+          rangeValueDisplay.innerText = rangeInput.value;
+      });
+  });
+
+
+  /**
+   * Traitement du formulaire d'upload de CSV
+   */
+  var fileInput  = document.querySelector(".file-input" );  
+  var inputButton     = document.querySelector("#input-button");
+  var fileReturn = document.querySelector("#file-return");
+  var processButton = document.getElementById("process-button");
+        
+  inputButton.addEventListener( "keydown", function( event ) {  
+      if ( event.keyCode == 13 || event.keyCode == 32 ) {  
+          fileInput.focus();  
+      }  
+  });
+
+  inputButton.addEventListener( "click", function( event ) {
+    fileInput.focus();
+    return false;
+  });  
+
+  fileInput.addEventListener( "change", function( event ) {  
+      fileReturn.innerHTML = this.value;  
+      processButton.disabled = false;
+  });  
+
+  function updateGraphParams() {
+    document.getElementById('graph').style.display = 'none';
+    document.getElementById('loading-spinner').style.display = 'flex';
+
+    var rangeParams = {};
+    var rangeSliders = document.querySelectorAll('.linked-range');
+
+    rangeSliders.forEach(function(slider) {
+        var paramName = slider.getAttribute('data-param-name');
+        var paramValue = slider.value;
+        rangeParams[paramName] = paramValue;
+    });
+
+    // Collecte les états des cases à cocher cochées
+    const checkboxes = document.querySelectorAll('.form-check-input');
+    const checkedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+    const checkedValues = checkedCheckboxes.map(checkbox => checkbox.value);
+    
+    // Stock les valeurs cochées dans l'input caché
+    document.getElementById('checked-values').value = JSON.stringify(checkedValues);
+
+    const params = {
+      metrics: checkedValues,
+      params: rangeParams
+    };
+
+    // Appele la fonction change_graph() pour obtenir le code HTML du graphique
+    fetch("{% url 'change_graph_params' %}", {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params)
+    })
+    .then(response => {
+              if (response.ok) {
+                  return response.text();
+              } else {
+                if (response.status === 404) {
+                  response.text().then((res) => {
+                    var errorMessageElement = document.querySelector("#error-message");
+                    errorMessageElement.innerHTML = res;
+                                      
+                    const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+                    modal.show();
+
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('graph').style.display = 'block';
+                  })
+
+                }
+              }
+          })
+    .then(data => {
+        var figure = JSON.parse(data);  
+        Plotly.newPlot('graph', figure.data, figure.layout);  
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('graph').style.display = 'block';
+    })
+    .catch(error => {
+        console.error('Erreur lors de la mise à jour du graphique :', error);
+    });
+  }
+
+
+  /**
+   * Traitement des actions d'envoi des formulaires
+   */
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('loading-spinner').style.display = 'none';
+
+    document.getElementById('params-form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Empêche la soumission par défaut du formulaire
+
+        updateGraphParams();
+    });
+
+    document.getElementById('csv-form').addEventListener('submit', function (e) {
+        e.preventDefault(); // Empêche la soumission du formulaire par défaut
+
+        const formData = new FormData(); // Crée un objet FormData pour le formulaire
+        const fileInput = document.getElementById('csv-file');
+
+        // Ajout le fichier sélectionné à l'objet FormData
+        formData.append('csv', fileInput.files[0]);
+        document.getElementById('graph').style.display = 'none';
+        document.getElementById('loading-spinner').style.display = 'flex';
+
+        fetch("{% url 'change_graph_data' %}", {
+          method: 'POST',
+          body: formData
+          })
+        .then(response => {
+              if (response.ok) {
+                  return response.text();
+              } else {
+                if (response.status === 404) {
+                  response.text().then((res) => {
+                    var errorMessageElement = document.querySelector("#error-message");
+                    errorMessageElement.innerHTML = res;
+                                      
+                    const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+                    modal.show();
+
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    document.getElementById('graph').style.display = 'block';
+                  })
+
+                }
+              }
+          })
+        .then(data => {
+              var figure = JSON.parse(data);  
+              Plotly.newPlot('graph', figure.data, figure.layout);  
+
+              document.getElementById('loading-spinner').style.display = 'none';
+              document.getElementById('graph').style.display = 'block';
+          })
+        .catch(error => {
+              console.error('Erreur lors de la mise à jour du graphique :', error);
+        });
+    });
+  });
+</script>
+</body>
+</html>

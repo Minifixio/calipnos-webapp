@@ -1,0 +1,126 @@
+{% extends './base.html' %}
+{% block title %}Configuration{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .range-value {
+        display: inline-block;
+        width: 50px; /* Fixe la largeur pour accueillir jusqu'à 3 chiffres */
+        text-align: right; /* Aligner à droite pour que les chiffres s'affichent correctement */
+    }
+    .is-invalid {
+        border-color: #dc3545; /* Rouge pour les champs invalides */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+        <div class="mx-5">
+            <form id="config-form">
+                {% csrf_token %}
+                
+                {% for obj in params_with_values %}
+                <div class="mb-3">
+                    <label for="param_{{ forloop.counter }}" class="form-label">{{ obj.param.name }}</label>
+                    <select class="form-select" id="{{ obj.param.id }}" name="doctor_param_{{ obj.param.name }}">
+                        <option selected disabled>Choisir une valeur pour {{ obj.param.name }}</option>
+                        {% for value in obj.values %}
+                        <option value="{{ value.id }}" data-value="{{ value.value }}">{{ value.value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+                
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="submit" class="btn btn-primary">Générer le fichier de configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+function getDeviceConfig() {
+    let allValid = true;
+    
+    // Récupérer tous les éléments <select> associés à doctor_params_with_values
+    const selects = document.querySelectorAll('select[name^="doctor_param_"]');
+    
+    // Vérifier chaque select pour s'assurer qu'une option est sélectionnée
+    selects.forEach(function(select) {
+        if (select.value === "" || select.value.includes("Choisir une valeur pour ")) {
+            allValid = false;
+            select.classList.add('is-invalid'); // Ajouter une classe Bootstrap pour signaler l'erreur
+        } else {
+            select.classList.remove('is-invalid'); // Supprimer l'erreur si une valeur est choisie
+        }
+    });
+
+    // Si un champ est vide, empêcher la soumission du formulaire
+    if (!allValid) {
+        alert('Veuillez sélectionner une valeur pour tous les champs avant de soumettre.');
+    } else {
+        // Créer l'objet pour la requête
+        const requestBody = {
+            doctor_config_ids: {}, // Uniquement les IDs des paramètres de configuration et les IDs des valeurs sélectionnées
+            doctor_config: {} // Un objet pour stocker les valeurs sélectionnées
+        };
+
+        // Récupérer les valeurs des sélecteurs Doctor
+        const doctorSelects = document.querySelectorAll('select[name^="doctor_param_"]');
+        doctorSelects.forEach(select => {
+            const selectedValue = select.options[select.selectedIndex].text;
+            requestBody.doctor_config_ids[select.id] = parseInt(select.value);
+            requestBody.doctor_config[select.name.split("doctor_param_")[1]] = selectedValue;
+        });
+
+        console.log(requestBody);
+
+        // Envoyer la requête POST avec fetch
+        fetch('{% url 'download_device_configuration' %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Ajouter le token CSRF
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Créer un lien temporaire pour le téléchargement
+            return response.blob();  // Obtenir la réponse en tant que blob
+        })
+        .then(blob => {
+            // Créer un lien pour télécharger le fichier
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'device_configuration.json';  // Nom du fichier téléchargé
+            document.body.appendChild(a);
+            a.click();  // Simuler le clic pour télécharger
+            a.remove();  // Supprimer le lien
+            window.URL.revokeObjectURL(url);  // Libérer la mémoire
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('config-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        getDeviceConfig();
+    });
+});
+</script>
+{% endblock %}
+</body>
+</html>

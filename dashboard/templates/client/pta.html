@@ -1,0 +1,313 @@
+{% extends './base.html' %}
+{% block title %}PTA{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .range-value {
+        display: inline-block;
+        width: 50px; /* Fixe la largeur pour accueillir jusqu'à 3 chiffres */
+        text-align: right; /* Aligner à droite pour que les chiffres s'affichent correctement */
+    }
+    .is-invalid {
+        border-color: #dc3545; /* Rouge pour les champs invalides */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Ajout d'un règle de configuration</h5>
+        <form id="config-form">
+            {% csrf_token %}
+
+            <div class="d-flex columns">
+                <div class="d-flex row justify-content-center align-items-center mx-3">
+                    {% for obj in doctor_params_with_values %}
+                    <div class="mb-3">
+                        <label for="param_{{ forloop.counter }}" class="form-label">{{ obj.param.name }}</label>
+                        <select class="form-select" id="{{ obj.param.id }}" name="doctor_param_{{ obj.param.name }}">
+                            <option selected disabled>Choisir une valeur pour {{ obj.param.name }}</option>
+                            {% for value in obj.values %}
+                            <option value="{{ value.id }}">{{ value.value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <i class="bi bi-arrow-right" style="font-size:xxx-large"></i>
+                </div>
+                <div class="d-flex row justify-content-center align-items-center mx-3">            
+                    {% for param in device_params_selection %}
+                    <div class="mb-3">
+                        <label for="param_{{ forloop.counter }}" class="form-label">{{ param.name }}</label>
+
+                        {% if param.range.type == 'int' %}
+                        <!-- Range slider for integer values -->
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range" 
+                                id="{{ param.id }}" 
+                                name="device_param_{{ param.name }}" 
+                                min="{{ param.range.min }}" 
+                                max="{{ param.range.max }}" 
+                                value="{{ param.default_value }}"
+                                step="{{ param.quantum }}"
+                                oninput="updateRangeValue({{ forloop.counter }}, this.value)">
+                            <span id="rangeValue_{{ forloop.counter }}" class="ms-2 range-value">{{ param.default_value }}</span>
+                        </div>
+                        
+                        {% elif param.range.type == 'selection' %}
+                        <!-- Select dropdown for predefined values -->
+                        <select class="form-select" id="{{ param.id }}" name="device_param_{{ param.name }}">
+                            <option selected disabled>Choisir une valeur pour {{ param.name }}</option>
+                            {% for value in param.range.values %}
+                            <option value="{{ value }}" {% if value == param.default_value %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+
+                        {% else %}
+                        <!-- In case there's no valid range type, we can provide an alternative input or message -->
+                        <p>Type de paramètre non supporté : {{ param.range.type }}</p>
+
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="d-flex justify-content-center mt-4">
+                <button type="submit" class="btn btn-primary">Ajouter la règle de configuration</button>
+            </div> 
+        </form>
+
+        <div class="d-flex justify-content-center mt-4">
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#configListModal">
+                Afficher la liste des configurations
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="configListModal" tabindex="-1" aria-labelledby="configListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configListModalLabel">Liste des configurations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="accordion" id="accordionContainer">
+                    {% for item in configuration_pairings %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                                Configuration {{ forloop.counter }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body d-flex justify-content-evenly">
+                                <!-- Liste pour doctor_config -->
+                                <div class="me-4">
+                                    <h5>Doctor Configuration</h5>
+                                    <ul class="list-group list-group-flush">
+                                        {% for param_name, param_value in item.doctor_config.items %}
+                                        <li class="list-group-item">
+                                        {{ param_name }}: {{ param_value }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                    
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-arrow-right" style="font-size:xxx-large"></i>
+                                </div>
+                    
+                                <!-- Liste pour device_config -->
+                                <div>
+                                    <h5>Device Configuration</h5>
+                                    <ul class="list-group list-group-flush">
+                                        {% for param_name, param_value in item.device_config.items %}
+                                        <li class="list-group-item">
+                                        {{ param_name }}: {{ param_value }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>    
+                <div class="accordion" id="configAccordionModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Succès</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                La configuration a été sauvegardée avec succès !
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="text/javascript">
+function updateRangeValue(counter, value) {
+    document.getElementById('rangeValue_' + counter).textContent = value;
+}
+
+function updateAccordionList(configurationPairings) {
+    const accordionContainer = document.getElementById('accordionContainer');
+
+    // Vider l'actuel contenu de l'accordéon dans la page et dans le modal
+    accordionContainer.innerHTML = '';
+
+    configurationPairings.forEach((item, index) => {
+        const accordionItem = `
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="false" aria-controls="collapse${index}">
+                        Configuration ${index + 1}
+                    </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                    <div class="accordion-body d-flex justify-content-evenly">
+                        <div class="me-4">
+                            <h5>Doctor Configuration</h5>
+                            <ul class="list-group list-group-flush">
+                                ${Object.entries(item.doctor_config).map(([param_name, param_value]) => 
+                                    `<li class="list-group-item">${param_name}: ${param_value}</li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-arrow-right" style="font-size:xxx-large"></i>
+                        </div>
+                        <div>
+                            <h5>Device Configuration</h5>
+                            <ul class="list-group list-group-flush">
+                                ${Object.entries(item.device_config).map(([param_name, param_value]) => 
+                                    `<li class="list-group-item">${param_name}: ${param_value}</li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Ajouter chaque item dans l'accordéon principal et dans le modal
+        accordionContainer.innerHTML += accordionItem;
+    });
+}
+
+function submitConfigRule() {
+    let allValid = true;
+    
+    // Récupérer tous les éléments <select> associés à doctor_params_with_values
+    const selects = document.querySelectorAll('select[name^="doctor_param_"]');
+    
+    // Vérifier chaque select pour s'assurer qu'une option est sélectionnée
+    selects.forEach(function(select) {
+        if (select.value === "" || select.value.includes("Choisir une valeur pour ")) {
+            allValid = false;
+            select.classList.add('is-invalid'); // Ajouter une classe Bootstrap pour signaler l'erreur
+        } else {
+            select.classList.remove('is-invalid'); // Supprimer l'erreur si une valeur est choisie
+        }
+    });
+
+    // Si un champ est vide, empêcher la soumission du formulaire
+    if (!allValid) {
+        alert('Veuillez remplir tous les champs avant de soumettre.');
+    } else {
+        // event.preventDefault(); // Empêcher le comportement de soumission par défaut
+
+        // Créer l'objet pour la requête
+        const requestBody = {
+            doctor_config: {},
+            device_config: {}
+        };
+
+        // Récupérer les valeurs des sélecteurs Doctor
+        const doctorSelects = document.querySelectorAll('select[name^="doctor_param_"]');
+        doctorSelects.forEach(select => {
+            requestBody.doctor_config[select.id] = parseInt(select.value);
+        });
+
+        // Récupérer les valeurs des sélecteurs Device
+        const deviceSelects = document.querySelectorAll('select[name^="device_param_"]');
+        const deviceRanges = document.querySelectorAll('input[name^="device_param_"]');
+        deviceSelects.forEach(select => {
+            requestBody.device_config[select.id] = parseInt(select.value);
+        });
+        deviceRanges.forEach(range => {
+            requestBody.device_config[range.id] = parseInt(range.value);
+        });
+
+        console.log(requestBody);
+
+        // Envoyer la requête POST avec fetch
+        fetch('{% url 'add_configuration_rule' %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Ajouter le token CSRF
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            var myModal = new bootstrap.Modal(document.getElementById('successModal'));
+            myModal.show(); // Affiche le modal
+
+            updateAccordionList(data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('config-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitConfigRule();
+    });
+
+    var configListModal = document.getElementById('configListModal');
+    configListModal.addEventListener('show.bs.modal', function (event) {
+        fetch('{% url "get_configuration_pairings" %}')
+            .then(response => response.json())
+            .then(data => {
+                updateAccordionList(data);
+            });
+    });
+});
+</script>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    {% load static %}
+    <link rel="icon" href="{% static 'logo.svg' %}">
+
+    <title>Calipnos</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url('static/homepage_background.jpg') no-repeat;
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            color: #fff; 
+            height: 100vh;
+        }
+
+        .content {
+            text-align: center;
+            padding: 8rem;
+            display: flex;
+            flex-direction: row;
+        }
+
+        h1 {
+            font-size: 2.5em;
+        }
+
+        p {
+            font-size: 3.5vh;
+            font-weight: bold;
+            text-align: start;
+        }
+
+        #left-content {
+            width: 50%;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #right-content {
+            width: 50%;
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: end;
+        }
+
+        .img-fluid {
+            width: 40%;
+        }
+
+        #mail-div {
+            background: white;
+            padding: 5px;
+            border-radius: 10px;
+            width: 40%;
+            margin-top: 10px;
+        }
+
+        a {
+            font-size: 1.5vw;
+            color: #1f497d;
+        }
+
+        #access-buttons-div {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            padding: 20px;
+        }
+
+        #access-plotter-button {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            font-size: xx-large!important;
+            text-align: start;
+        }
+
+        .p-div {
+            margin-top: 10px;
+            height: 30vh;
+        }
+
+
+    @media (max-width: 768px) {
+        .content {
+            flex-direction: column;
+            text-align: center;
+            padding: 10vw;
+        }
+
+        #left-content,
+        #right-content {
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        p {
+            font-size: 2vh;
+        }
+
+        #left-content {
+            height: 50vh;
+        }
+
+        #right-content {
+            justify-content: start;
+            height: 50vh;
+        }
+
+        .img-fluid {
+            width: 70%;
+        }
+
+        #mail-div {
+            width: 70%;
+        }
+
+        a {
+            font-size: 4vw;
+        }
+
+        .btn {
+            font-size: x-large!important;
+            text-align: start;
+        }
+    }
+
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div id="left-content">
+            <div class="p-div"><p>En France, des millions de personnes souffrent de l’apnée du sommeil sans le savoir.</p></div>
+
+            <div class="p-div"><p>L’objectif de Calipnos est de faciliter leur identification par leur médecin traitant.</p></div>
+
+            <div class="p-div"><p>Avec le bracelet de mesure et la plateforme d’analyses Calipnos, identifier l’apnée du sommeil n’a jamais été aussi simple.</p></div>
+        </div>
+
+        {% load static %}
+
+
+        <div id="right-content">
+            <img class="img-fluid" src="{% static 'logo.png' %}">
+            <div id="mail-div"><a href="mailto:info@calipnos.com">info@calipnos.com</a></div>
+        </div>
+
+        <div id="access-buttons-div">
+            <div id="access-plotter-button">
+                <a type="button" class="btn btn-outline-light" href="/login">Accéder à la platforme <br> d'analyse Calipnos →</a>
+            </div>
+    
+            <div id="access-client-button">
+                <a type="button" class="btn btn-outline-light" href="/client">Accéder à la platforme <br> Calipnos Beta →</a>
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

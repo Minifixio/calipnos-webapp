@@ -1,0 +1,62 @@
+<svg width="1624" height="544" xmlns="http://www.w3.org/2000/svg" xml:space="preserve">
+ <g id="Layer_1">
+  <title>Layer 1</title>
+  <g>
+   <defs transform="translate(-64.5 0) translate(0 -16.5) translate(0 100.5) translate(-2 0) translate(2 41.9999) translate(0 -202.5)">
+    <clipPath id="svg_12">
+     <rect x="714" y="243" width="1753" height="697" id="svg_13"/>
+    </clipPath>
+    <clipPath id="svg_10">
+     <path d="m163.1681,84.34949c-47.865,0 -86.668,38.803 -86.668,86.668l0,346.664c0,47.865 38.803,86.668 86.668,86.668l1426.662,0c47.87,0 86.67,-38.803 86.67,-86.668l0,-346.664c0,-47.865 -38.8,-86.668 -86.67,-86.668l-1426.662,0zm-103.168,-47.5l1753,0l0,697l-1753,0l0,-697z" fill-rule="evenodd" clip-rule="evenodd" id="svg_11"/>
+    </clipPath>
+    <clipPath id="svg_8">
+     <rect x="-658.9999" y="-211.15051" width="1644" height="566" id="svg_9"/>
+    </clipPath>
+    <clipPath id="svg_6">
+     <rect x="59.0001" y="74.84949" width="1635" height="556" id="svg_7"/>
+    </clipPath>
+   </defs>
+   <g>
+    <title>Layer 1</title>
+    <g>
+     <defs transform="translate(-64.5 0) translate(0 -16.5) translate(0 100.5) translate(-2 0) translate(2 41.9999) translate(0 -202.5) translate(0.0000610352 0) translate(60.0001 0) translate(0 36.8495)">
+      <filter id="svg_4" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse">
+       <feGaussianBlur stdDeviation="4.8119 4.8119"/>
+      </filter>
+      <clipPath id="svg_1">
+       <rect x="709.50012" y="203.34948" width="1753" height="697"/>
+      </clipPath>
+      <clipPath id="svg_2">
+       <path d="m812.66812,250.84948c-47.865,0 -86.668,38.803 -86.668,86.668l0,346.664c0,47.865 38.803,86.668 86.668,86.668l1426.662,0c47.87,0 86.67,-38.803 86.67,-86.668l0,-346.664c0,-47.865 -38.8,-86.668 -86.67,-86.668l-1426.662,0zm-103.168,-47.5l1753,0l0,697l-1753,0l0,-697z" fill-rule="evenodd" clip-rule="evenodd"/>
+      </clipPath>
+      <clipPath id="svg_3">
+       <rect x="-9.49988" y="-44.65052" width="1644" height="566"/>
+      </clipPath>
+      <clipPath id="svg_5">
+       <rect x="-4.49988" y="-39.65052" width="1635" height="556"/>
+      </clipPath>
+     </defs>
+     <g clip-path="url(#svg_1)" transform="translate(-714 -243)">
+      <g clip-path="url(#svg_2)">
+       <g clip-path="url(#svg_3)" filter="url(#svg_4)" transform="translate(713 281)">
+        <g clip-path="url(#svg_5)">
+         <path d="m13.00002,64.81848c0,-47.8657 38.8028,-86.6685 86.6681,-86.6685l1426.662,0c47.87,0 86.67,38.8028 86.67,86.6685l0,346.663c0,47.866 -38.8,86.669 -86.67,86.669l-1426.662,0c-47.8653,0 -86.6681,-38.803 -86.6681,-86.669l0,-346.663z" stroke="#4A7EBB" stroke-width="3" stroke-linejoin="round" stroke-miterlimit="10" fill="#1F497D" fill-rule="evenodd"/>
+        </g>
+       </g>
+      </g>
+      <path d="m726.00012,337.51748c0,-47.865 38.803,-86.668 86.668,-86.668l1426.662,0c47.87,0 86.67,38.803 86.67,86.668l0,346.664c0,47.865 -38.8,86.668 -86.67,86.668l-1426.662,0c-47.865,0 -86.668,-38.803 -86.668,-86.668l0,-346.664z" stroke="#4A7EBB" stroke-width="3.4375" stroke-linejoin="round" stroke-miterlimit="10" fill="#1F497D" fill-rule="evenodd"/>
+      <path d="m965.50012,631.34948c-91.127,0 -165,-56.188 -165,-125.5c0,-69.312 73.873,-125.5 165,-125.5c-91.127,51.984 -109.595,150.313 -41.25,219.625c11.726,11.892 25.615,22.456 41.25,31.375z" fill="#FFFFFF" fill-rule="evenodd"/>
+      <path d="m2076.50012,498.84948l-56.09,20.737l0,-41.474l56.09,20.737zm-40.72,-102.18l-25.55,55.901l-28.21,-29.326l53.76,-26.575zm-98.28,-42.32l19.95,58.312l-39.9,0l19.95,-58.312zm-98.29,42.32l53.77,26.575l-28.21,29.326l-25.56,-55.901zm-40.71,102.18l56.09,-20.737l0,41.474l-56.09,-20.737zm40.71,102.167l25.56,-55.888l28.21,29.326l-53.77,26.562zm98.29,42.333l-19.95,-58.312l39.9,0l-19.95,58.312zm98.28,-42.333l-53.76,-26.562l28.21,-29.326l25.55,55.888zm-167.78,-102.167c0,-39.903 31.12,-72.25 69.5,-72.25c38.38,0 69.5,32.347 69.5,72.25c0,39.903 -31.12,72.25 -69.5,72.25c-38.38,0 -69.5,-32.347 -69.5,-72.25z" fill="#FFFFFF" fill-rule="evenodd"/>
+      <text fill="#FFFFFF" font-family="Bahnschrift SemiLight,Bahnschrift SemiLight_MSFontService,sans-serif" font-weight="300" font-size="330" transform="matrix(1 0 0 1 974.622 671)" y="-39.65052" x="-4.49988">A</text>
+      <text fill="#FFFFFF" font-family="Bahnschrift SemiLight,Bahnschrift SemiLight_MSFontService,sans-serif" font-weight="300" font-size="330" transform="matrix(1 0 0 1 1166.27 671)" y="-39.65052" x="-4.49988">L</text>
+      <text fill="#FFFFFF" font-family="Bahnschrift SemiLight,Bahnschrift SemiLight_MSFontService,sans-serif" font-weight="300" font-size="330" transform="matrix(1 0 0 1 1338.62 672)" y="-39.65052" x="-4.49988">I</text>
+      <text fill="#FFFFFF" font-family="Bahnschrift SemiLight,Bahnschrift SemiLight_MSFontService,sans-serif" font-weight="300" font-size="330" transform="matrix(1 0 0 1 1395.76 674)" y="-39.65052" x="-4.49988">P</text>
+      <text fill="#FFFFFF" font-family="Bahnschrift SemiLight,Bahnschrift SemiLight_MSFontService,sans-serif" font-weight="300" font-size="330" transform="matrix(1 0 0 1 1576.41 674)" y="-39.65052" x="-4.49988">N</text>
+      <text fill="#FFFFFF" font-family="Bahnschrift SemiLight,Bahnschrift SemiLight_MSFontService,sans-serif" font-weight="300" font-size="330" transform="matrix(1 0 0 1 2065.18 674)" y="-39.65052" x="-4.49988">S</text>
+     </g>
+    </g>
+   </g>
+  </g>
+ </g>
+
+</svg>

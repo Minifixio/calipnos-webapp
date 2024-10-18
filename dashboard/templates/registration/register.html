@@ -1,0 +1,44 @@
+
+{% extends 'registration/base.html' %} {% block content %}
+<section>
+  <div class="container">
+    {% load static %}
+    <div class="row">
+      <div class="d-flex flex-column col-md-12 col-centered align-items-center">
+        <div class="w-50">
+          <img class="img-fluid" src="{% static 'logo.svg' %}">
+        </div>
+        <h1 class="mt-5 mb-3">S'enregistrer</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 offset-md-3 mt-3">
+        <form method="post" action="{% url 'register' %}">
+          {% csrf_token %} {% for field in form %}
+          <div class="form-group">
+            {{ field.label_tag }}
+            <input
+              type="{% if 'password' in field.label_tag %}password{% else %}text{% endif %}"
+              name="{{ field.html_name }}"
+              class="form-control"
+              maxlength="{% if 'username' in field.label_tag %}150{% endif %}"
+              id="{{ field.id_for_label }}"
+              required
+            />
+          </div>
+          {% if field.errors %} {% for error in field.errors %}
+          <p style="font-size: 13px;">
+            {{ error|escape }}
+          </p>
+          {% endfor %} {% endif %} {% endfor %}
+          <div class="d-flex flex-row justify-content-between align-items-baseline">
+            <button type="submit" class="btn btn-primary mt-2">S'enregistrer</button>
+            <p><a class="link-opacity-100" href="/login">Retour</a></p>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
