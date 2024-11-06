@@ -76,7 +76,7 @@ def read_binary_file(data):
     # Lecture des mesures
     measures = []
     measure_size = sum([struct.calcsize(fmt) for _, (name, fmt, size, _) in MXX_CONFIG.items()])
-    measures_start_offset = 0x50
+    measures_start_offset = 0x60
 
     ## DEBUG
     # print(f"Measure size: {measure_size} bytes")

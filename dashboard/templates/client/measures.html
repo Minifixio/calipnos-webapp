@@ -50,15 +50,13 @@
                 <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Erreur avec le fichier</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="error-message"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
                 </div>
             </div>
@@ -69,15 +67,13 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmation de suppression</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         Êtes-vous sûr de vouloir supprimer cette mesure ?
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                         <button type="button" class="btn btn-danger" id="confirm-delete-button">Supprimer</button>
                     </div>
                 </div>
@@ -91,6 +87,7 @@
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         console.log('DOM chargé');
+
         const fileInput = document.getElementById('bin-file');
         const form = document.getElementById('bin-form');
 
@@ -100,7 +97,8 @@
         });
 
         document.getElementById('input-button').addEventListener('click', function () {
-            document.getElementById('bin-file').click();  // Simule un clic sur le champ de fichier
+            console.log('Clic sur le bouton de dépôt');
+            fileInput.click();  // Simule un clic sur le champ de fichier
         });
 
         fileInput.addEventListener('change', function (event) {
@@ -126,7 +124,7 @@
                     response.text().then((res) => {
                         var errorMessageElement = document.querySelector("#error-message");
                         errorMessageElement.innerHTML = res;
-                                          
+                                            
                         const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
                         modal.show();
                     });
@@ -162,14 +160,20 @@
                     });
 
                     bindButtons(); // Lier les boutons après avoir chargé les mesures
+                    //loadMeasures(); // Recharger les mesures après le téléchargement
                 }
             })
             .catch(error => {
                 console.error('Erreur lors de la mise à jour de la liste de mesures :', error);
+            })
+            .finally(() => {
+                // Réinitialiser la valeur du champ de fichier
+                fileInput.value = ''; 
             });
         });
 
         function bindButtons() {
+            console.log('Lier les boutons');
             // Événement pour le bouton de suppression
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', function () {
@@ -225,6 +229,7 @@
         }
 
         function loadMeasures() {
+            console.log('Chargement des mesures...');
             fetch("{% url 'get_measures' %}") 
                 .then(response => {
                     if (!response.ok) {
@@ -266,6 +271,7 @@
             });
         }
 
+        //bindButtons();
         loadMeasures(); // Charger les mesures au chargement de la page
     });
 </script>

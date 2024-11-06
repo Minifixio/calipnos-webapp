@@ -153,9 +153,16 @@ def get_doctor_configurations():
         return params_with_values
 
 def get_device_configurations():
-    # Récupére les noms des paramètres depuis DeviceConfigurationParameterName
-    # Pour chaque paramètre param_n, on récupére les valeurs des paramètres 
-    # depuis DeviceConfigurationParameterValue pour lesquels param=param_n
+    """
+    Récupère les noms des paramètres depuis DeviceConfigurationParameterName
+    Pour chaque paramètre param_n, on récupére les valeurs des paramètres 
+    depuis DeviceConfigurationParameterValue pour lesquels param=param_n
+
+    Returns
+    -------
+    dict
+        Dictionnaire de la forme {param1: [value1, value2, ...], param2: [value1, value2, ...], ...}
+    """
 
     params_with_values = list()
 
@@ -179,7 +186,8 @@ def get_device_configurations_selection():
     return parameters
 
 def update_configuration_rule(doctor_config, device_config):
-    """ Mettre à jour les configurations pour un médecin et un appareil spécifiques
+    """ 
+    Mettre à jour les configurations pour un médecin et un appareil spécifiques
     
     Parameters
     ----------

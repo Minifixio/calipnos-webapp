@@ -2,41 +2,42 @@ import json
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from ..db_utils import manager as db_manager 
 
 def pta(request):
-    doctor_params_with_values = db_manager.get_doctor_configurations()
     device_params_selection = db_manager.get_device_configurations_selection()
-    configuration_pairings = db_manager.get_configuration_pairings()
+    queryset = device_params_selection.values()
 
-    return render(
-        request, 
-        'client/pta.html', 
-        {
-            'doctor_params_with_values': doctor_params_with_values, 
-            'device_params_selection': device_params_selection,
-        }
-    )
+    # Logguer chaque élément du QuerySet comme un dictionnaire
+    for item in queryset:
+        print(item)
+    return render(request, 'client/pta.html', {'device_params_selection': device_params_selection})
 
-def get_configuration_pairings(request):
-    configuration_pairings = db_manager.get_configuration_pairings()
-    return JsonResponse(configuration_pairings, safe=False)
-
-@csrf_exempt
-@require_POST
-def add_configuration_rule(request):
+def download_device_configuration(request):
     # Récupérer les données du formulaire
     body = json.loads(request.body.decode("utf-8"))
 
-    doctor_config = body['doctor_config']
     device_config = body['device_config']
 
-    db_manager.update_configuration_rule(doctor_config, device_config)
+    # Configuration factice du docteur
+    # afin de simuler une configuration de docteur
+    doctor_config = {
+        "Couleur des yeux": "Marron",
+        "Epaisseur de peau": "Epaisse",
+        "Age": "35-49",
+        "dummy": True
+    }
 
-    configuration_pairings = db_manager.get_configuration_pairings()
+    result = {
+        "CC": doctor_config,
+        "PTA": device_config
+    }
+    
+    json_result = json.dumps(result, indent=4)
 
-    return JsonResponse(configuration_pairings, safe=False)
-
+    # Créer une réponse HTTP avec le contenu JSON
+    response = HttpResponse(json_result, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename=device_configuration.json'
+    return response
     

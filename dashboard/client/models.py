@@ -59,6 +59,7 @@ class DeviceConfigurationParameterName(models.Model):
     range = models.JSONField()
     quantum = models.FloatField()
     default_value = models.FloatField()
+    unit = models.CharField(max_length=255, blank=True, null=True)
 
 class DeviceConfigurationParameterValue(models.Model):
     id = models.AutoField(primary_key=True)
