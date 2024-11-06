@@ -26,6 +26,7 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Date de dépôt</th>
+                        <th scope="col">Nom</th>
                         <th scope="col">Durée (sec)</th>
                         <th scope="col">Nombre de points</th>
                         <th scope="col">Action</th>
@@ -145,6 +146,7 @@
                         row.innerHTML = `
                             <th scope="row">${measure.id}</th>
                             <td>${measure.upload_date}</td>
+                            <td>${measure.name}</td>
                             <td>${measure.duration}</td>
                             <td>${measure.points_count}</td>
                             <td>
@@ -250,6 +252,7 @@
                         row.innerHTML = `
                             <th scope="row">${measure.id}</th>
                             <td>${measure.upload_date}</td>
+                            <td>${measure.name}</td>
                             <td>${measure.duration}</td>
                             <td>${measure.points_count}</td>
                             <td>

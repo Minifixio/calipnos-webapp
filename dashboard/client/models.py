@@ -2,6 +2,7 @@ from django.db import models
 
 class DeviceMeasure(models.Model):
     id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
     config_id = models.IntegerField(default=None, blank=True, null=True)
     version = models.IntegerField()
     config = models.JSONField()

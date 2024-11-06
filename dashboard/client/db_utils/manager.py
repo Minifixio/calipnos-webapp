@@ -10,7 +10,7 @@ def convert_ms_to_datetime(seconds):
     date_time = datetime.datetime.fromtimestamp(seconds, tz=pytz.utc)
     return date_time
 
-def add_measure(file_content):
+def add_measure(file_content, file_name):
     """
     Ajoute une nouvelle mesure à la base de données en parsant le contenu du fichier binaire.
     """
@@ -29,6 +29,7 @@ def add_measure(file_content):
 
     measure = DeviceMeasure(
         version=result['version'],
+        name = file_name,
         config=result['config'],
         pta=result['pta'],
         start_time=convert_ms_to_datetime(result['timestamp_start']),

@@ -27,20 +27,21 @@ def upload_binary(request):
 
     try:
         # Ajout de la nouvelle mesure via measures_handler
-        db_manager.add_measure(file_content)
+        db_manager.add_measure(file_content, bin.name[:-4])
 
         # Récupérer la liste des mesures après l'ajout
         measures = db_manager.get_measures()
 
         # Convertir le QuerySet en liste de dictionnaires
         measures_data = list(measures.values(
-            'id', 'version', 'upload_date', 'start_time', 'end_time', 'points_count'
+            'id', 'version', 'name', 'upload_date', 'start_time', 'end_time', 'points_count'
         ))
 
         res = [
             {
                 'id': measure['id'],
                 'version': measure['version'],
+                'name': measure['name'],
                 'upload_date': measure['upload_date'].strftime('%Y-%m-%d %H:%M:%S'),
                 'duration': (measure['end_time'] - measure['start_time']).total_seconds(),
                 'points_count': measure['points_count']
@@ -62,12 +63,13 @@ def get_measures(request):
 
     # Convertir le QuerySet en liste de dictionnaires
     measures_data = list(measures.values(
-        'id', 'version', 'upload_date', 'start_time', 'end_time', 'points_count'
+        'id', 'version', 'name', 'upload_date', 'start_time', 'end_time', 'points_count'
     ))
 
     res = [
         {
             'id': measure['id'],
+            'name': measure['name'],
             'version': measure['version'],
             'upload_date': measure['upload_date'].strftime('%Y-%m-%d %H:%M:%S'),
             'duration': (measure['end_time'] - measure['start_time']).total_seconds(),
@@ -103,8 +105,9 @@ def download_measure(request, measure_id):
     measure_points = db_manager.get_measure_points(measure_id)
     
     # Créer la réponse HTTP avec le bon type de contenu
+    measure_name = db_manager.get_measure(measure_id).name
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="measure_points_{measure_id}.csv"'
+    response['Content-Disposition'] = f'attachment; filename="{measure_name}.csv"'
 
     # Créer l'objet CSV writer
     writer = csv.writer(response, delimiter=';')
