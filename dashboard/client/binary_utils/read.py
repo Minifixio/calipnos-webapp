@@ -84,11 +84,17 @@ def read_binary_file(data):
 
     measures_count  = math.ceil((timestamp_stop - timestamp_start))
 
-    for i in range(measures_count + 1):
+    # measures_count in order to avoid precision errors because of the device internal clock
+    for i in range(measures_count + 2):
         measure_offset = measures_start_offset + i * measure_size
         if measure_offset + measure_size > file_size:
-            print(f"Skipping measure at offset {measure_offset}, exceeds file size")
+            # print(f"Skipping measure at offset {measure_offset}, exceeds file size")
             break
+        
+        if data[measure_offset:measure_offset + 32] == b'\xFF' * 32:
+            # print(f"Detected footer (32 bytes of 0xFF) at offset {measure_offset}, stopping measure extraction.")
+            break
+
         measure = {}
         for key, (name, fmt, size, _) in MXX_CONFIG.items():
             value = struct.unpack_from(fmt, data, measure_offset)[0]
